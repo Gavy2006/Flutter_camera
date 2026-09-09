@@ -263,7 +263,6 @@ class _PreviewscreenState extends State<Previewscreen> {
 
             const SizedBox(height: 8),
 
-
             const SizedBox(height: 24),
 
             const Align(
@@ -276,116 +275,127 @@ class _PreviewscreenState extends State<Previewscreen> {
 
             const SizedBox(height: 12),
 
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.black, width: 1),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Colors.black12,
-                    blurRadius: 8,
-                    spreadRadius: 1,
-                    offset: Offset(0, 2),
+            Center(
+              child: Container(
+                width: 330,
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: Colors.black,
+                    width: 1,
                   ),
-                ],
-              ),
-
-              child: Column(
-
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-
-                  const Text(
-                    "Video",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-
-                  const SizedBox(height: 4),
-
-                  const Text(
-                    "Check out all captured Video here",
-                    style: TextStyle(fontSize: 14, color: Colors.black54),
-                  ),
-
-                  const SizedBox(height: 16) ,
-
-                  videoController.value.isInitialized
-                      ? ClipRRect(
-                    borderRadius: BorderRadius.circular(16),
-                    child: AspectRatio(
-                      aspectRatio: videoController.value.aspectRatio,
-                      child: VideoPlayer(videoController),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Colors.black12,
+                      blurRadius: 8,
+                      spreadRadius: 1,
+                      offset: Offset(0, 2),
                     ),
-                  )
-                      : const SizedBox(
-                    height: 100,
-                    child: Center(child: CircularProgressIndicator()),
-                  ),
+                  ],
+                ),
 
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "Video",
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
 
-                  const SizedBox(height: 15,) ,
+                    const SizedBox(height: 4),
 
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      IconButton(
-                        onPressed: () async {
-                          await videoController.seekTo(
-                            videoController.value.position -
-                                const Duration(seconds: 10),
-                          );
-                        },
-                        icon: const Icon(
-                          Icons.replay_10,
-                          color: Colors.black,
-                          size: 28,
+                    const Text(
+                      "Check out all captured Video here",
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.black54,
+                      ),
+                    ),
+
+                    const SizedBox(height: 14),
+
+                    videoController.value.isInitialized
+                        ? Center(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(14),
+                        child: SizedBox(
+                          width: 290,
+                          height: 180,
+                          child: VideoPlayer(videoController),
                         ),
                       ),
-
-                      IconButton(
-                        onPressed: () {
-                          setState(() {
-                            if (videoController.value.isPlaying) {
-                              videoController.pause();
-                            } else {
-                              videoController.play();
-                            }
-                          });
-                        },
-                        icon: Icon(
-                          videoController.value.isPlaying
-                              ? Icons.pause
-                              : Icons.play_arrow,
-                          color: Colors.black,
-                          size: 30,
-                        ),
+                    )
+                        : const SizedBox(
+                      height: 150,
+                      child: Center(
+                        child: CircularProgressIndicator(),
                       ),
+                    ),
 
-                      IconButton(
-                        onPressed: () async {
-                          await videoController.seekTo(
-                            videoController.value.position +
-                                const Duration(seconds: 10),
-                          );
-                        },
-                        icon: const Icon(
-                          Icons.forward_10,
-                          color: Colors.black,
-                          size: 28,
+                    const SizedBox(height: 10),
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        IconButton(
+                          onPressed: () async {
+                            await videoController.seekTo(
+                              videoController.value.position -
+                                  const Duration(seconds: 10),
+                            );
+                          },
+                          icon: const Icon(
+                            Icons.replay_10,
+                            color: Colors.black,
+                            size: 26,
+                          ),
                         ),
-                      ),
-                    ],
-                  )
-                ],
-              )
-            ),
+
+                        IconButton(
+                          onPressed: () {
+                            setState(() {
+                              if (videoController.value.isPlaying) {
+                                videoController.pause();
+                              } else {
+                                videoController.play();
+                              }
+                            });
+                          },
+                          icon: Icon(
+                            videoController.value.isPlaying
+                                ? Icons.pause
+                                : Icons.play_arrow,
+                            color: Colors.black,
+                            size: 30,
+                          ),
+                        ),
+
+                        IconButton(
+                          onPressed: () async {
+                            await videoController.seekTo(
+                              videoController.value.position +
+                                  const Duration(seconds: 10),
+                            );
+                          },
+                          icon: const Icon(
+                            Icons.forward_10,
+                            color: Colors.black,
+                            size: 26,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ) ,
 
             const SizedBox(height: 10),
-
-
           ],
         ),
       ),
