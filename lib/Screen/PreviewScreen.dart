@@ -3,12 +3,12 @@ import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
+import 'package:video_screen/Manager/manager.dart';
 
 class Previewscreen extends StatefulWidget {
-  final List<XFile> list;
-  final XFile file;
 
-  const Previewscreen({super.key, required this.list, required this.file});
+
+  const Previewscreen({super.key,});
 
   @override
   State<Previewscreen> createState() => _PreviewscreenState();
@@ -17,24 +17,36 @@ class Previewscreen extends StatefulWidget {
 class _PreviewscreenState extends State<Previewscreen> {
   int index = 0;
 
+  String? file;
+  List<String> list = [];
+
+  Future<void> loadData() async {
+
+    final images = await manager().returnimages();
+    final video = await manager().returnvideo();
+
+
+    setState(() {
+      list = images;
+      file = video;
+    });
+
+    videoController = VideoPlayerController.file(
+      File(file!),
+    );
+
+    await videoController.initialize();
+
+    setState(() {});
+  }
+
   late VideoPlayerController videoController;
 
   @override
   void initState() {
+
     super.initState();
-
-    videoController = VideoPlayerController.file(File(widget.file.path));
-
-    videoController
-        .initialize()
-        .then((_) {
-          if (mounted) {
-            setState(() {});
-          }
-        })
-        .catchError((error) {
-          print("VIDEO ERROR: $error");
-        });
+    loadData() ;
   }
 
   @override
@@ -102,7 +114,7 @@ class _PreviewscreenState extends State<Previewscreen> {
                               ),
                               clipBehavior: Clip.antiAlias,
                               child: Image.file(
-                                File(widget.list[0].path),
+                                File(list[0]),
                                 width: double.infinity,
                                 fit: BoxFit.cover,
                               ),
@@ -129,7 +141,7 @@ class _PreviewscreenState extends State<Previewscreen> {
                               ),
                               clipBehavior: Clip.antiAlias,
                               child: Image.file(
-                                File(widget.list[1].path),
+                                File(list[1]),
                                 width: double.infinity,
                                 fit: BoxFit.cover,
                               ),
@@ -160,7 +172,7 @@ class _PreviewscreenState extends State<Previewscreen> {
                               ),
                               clipBehavior: Clip.antiAlias,
                               child: Image.file(
-                                File(widget.list[2].path),
+                                File(list[2]),
                                 width: double.infinity,
                                 fit: BoxFit.cover,
                               ),
@@ -187,7 +199,7 @@ class _PreviewscreenState extends State<Previewscreen> {
                               ),
                               clipBehavior: Clip.antiAlias,
                               child: Image.file(
-                                File(widget.list[3].path),
+                                File(list[3]),
                                 width: double.infinity,
                                 fit: BoxFit.cover,
                               ),
@@ -218,7 +230,7 @@ class _PreviewscreenState extends State<Previewscreen> {
                               ),
                               clipBehavior: Clip.antiAlias,
                               child: Image.file(
-                                File(widget.list[4].path),
+                                File(list[4]),
                                 width: double.infinity,
                                 fit: BoxFit.cover,
                               ),
@@ -245,7 +257,7 @@ class _PreviewscreenState extends State<Previewscreen> {
                               ),
                               clipBehavior: Clip.antiAlias,
                               child: Image.file(
-                                File(widget.list[5].path),
+                                File(list[5]),
                                 width: double.infinity,
                                 fit: BoxFit.cover,
                               ),

@@ -1,5 +1,6 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'Screen/SignUpScreen.dart';
 import 'Screen/firstPage.dart';
 
 Future<void> main() async {
@@ -28,7 +29,7 @@ class MyApp extends StatelessWidget {
           seedColor: Colors.deepPurple,
         ),
       ),
-      home: CameraScreen(camera: camera),
+      home: Signupscreen(),
     );
   }
 }

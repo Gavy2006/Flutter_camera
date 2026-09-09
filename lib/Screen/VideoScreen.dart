@@ -5,12 +5,12 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:photo_manager/photo_manager.dart';
+import 'package:video_screen/Manager/manager.dart';
 
 import 'PreviewScreen.dart';
 
 class Videoscreen extends StatefulWidget {
-  final List<XFile> list;
-  const Videoscreen({super.key, required this.list});
+  const Videoscreen({super.key});
 
   @override
   State<Videoscreen> createState() => _VideoscreenState();
@@ -231,11 +231,13 @@ class _VideoscreenState extends State<Videoscreen> {
       return;
     }
 
+    manager().insertvideo(recordedVideo!) ;
     Navigator.push(
       context,
+
       MaterialPageRoute(
         builder: (context) =>
-            Previewscreen(list: widget.list, file: recordedVideo!),
+            Previewscreen(),
       ),
     );
   }

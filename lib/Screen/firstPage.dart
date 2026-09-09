@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:geolocator/geolocator.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:video_screen/Manager/manager.dart';
 
 import 'VideoScreen.dart';
 
@@ -145,12 +146,13 @@ class _CameraScreenState extends State<CameraScreen> {
     list.add(capturedImage!);
 
     if (currentPhoto == 5) {
+
+      manager().insertimage(list) ;
+
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => Videoscreen(
-            list: list,
-          ),
+          builder: (context) => Videoscreen(),
         ),
       );
 
