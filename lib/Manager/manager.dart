@@ -12,34 +12,42 @@ class manager{
     final db = await  getDatabasesPath() ;
     final dpath = join(db , 'data.db') ;
 
+
     return await openDatabase(
+      dpath,
+      version: 2,
 
-      dpath ,
-      version: 1 ,
+      onCreate: (db, version) async {
+        await db.execute('''
+      CREATE TABLE imageslist(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        path TEXT
+      )
+    ''');
 
-      onCreate: (db , version) async{
+        await db.execute('''
+      CREATE TABLE video(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        path TEXT
+      )
+    ''');
 
-        await db.execute(
-          '''
-       CREATE Table imageslist(
-       
-       id INTEGER PRIMARY KEY AUTOINCREMENT ,
-       path TEXT
-       )
-          '''
-        ) ;
+        await db.execute('''
+      CREATE TABLE policy(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT,
+        policyno TEXT
+      )
+    ''');
 
-        await db.execute(
-            '''
-       CREATE Table video(
-       
-       id INTEGER PRIMARY KEY AUTOINCREMENT ,
-       path TEXT
-       )
-          '''
-        ) ;
-      }
-    ) ;
+        await db.execute('''
+      CREATE TABLE describe(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        describe TEXT
+      )
+    ''');
+      },
+    );
   }
 
 
@@ -59,6 +67,64 @@ class manager{
     }
     ) ;
   }
+
+  Future<void> details(
+
+       String name,
+       String policyno
+
+      ) async{
+
+    final db = await getDatabase() ;
+
+    await db.insert(
+        'policy' ,
+        {
+          "name" : name ,
+          "policyno" : policyno
+        }
+    ) ;
+  }
+
+
+  Future< List<Map<String , dynamic?>> > returndetails() async{
+
+    final db = await getDatabase() ;
+
+    final data  = await db.query('policy') ;
+
+    return data ;
+  }
+
+
+  Future<void> describe(
+
+      String describe,
+
+      ) async{
+
+    final db = await getDatabase() ;
+
+    await db.insert(
+        'describe' ,
+        {
+          "describe" : describe ,
+
+        }
+    ) ;
+  }
+
+
+  Future< List<Map<String , dynamic?>> > returndescribe() async{
+
+    final db = await getDatabase() ;
+
+    final data  = await db.query('describe') ;
+
+    return data ;
+  }
+
+
 
 
   Future<void> insertvideo(

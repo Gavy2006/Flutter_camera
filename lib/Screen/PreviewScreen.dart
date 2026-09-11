@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:local_auth/local_auth.dart';
+
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
@@ -8,7 +10,7 @@ import 'package:video_screen/Manager/manager.dart';
 class Previewscreen extends StatefulWidget {
 
 
-  const Previewscreen({super.key,});
+  const Previewscreen({super.key});
 
   @override
   State<Previewscreen> createState() => _PreviewscreenState();
@@ -19,6 +21,8 @@ class _PreviewscreenState extends State<Previewscreen> {
 
   String? file;
   List<String> list = [];
+
+  late final LocalAuthentication auth;
 
   Future<void> loadData() async {
 
@@ -40,12 +44,53 @@ class _PreviewscreenState extends State<Previewscreen> {
     setState(() {});
   }
 
+  List<Map<String , dynamic>> listno = [] ;
+  List<Map<String , dynamic>> describe = [] ;
+
+  Future<void> listdetails() async{
+
+    List<Map<String , dynamic>> listno1 = await manager().returndetails() ;
+    List<Map<String , dynamic>> describe1 = await manager().returndescribe() ;
+
+
+    setState(() {
+      listno= listno1 ;
+       describe = describe1 ;
+    });
+
+  }
+
+  Future<void> registerBiometric() async {
+    try {
+      final bool success = await auth.authenticate(
+        localizedReason: 'Register your fingerprint to continue',
+      );
+
+      if (success) {
+
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Images Submitted"))
+        ) ;
+
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("failed to submit"))
+        ) ;
+      }
+    } catch (e) {
+      print("Error: $e");
+    }
+  }
+
   late VideoPlayerController videoController;
 
   @override
   void initState() {
 
     super.initState();
+    auth = LocalAuthentication();
+    listdetails();
+
     loadData() ;
   }
 
@@ -65,7 +110,64 @@ class _PreviewscreenState extends State<Previewscreen> {
 
         child: Column(
           children: [
+
             Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.black, width: 1),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Colors.black12,
+                      blurRadius: 8,
+                      spreadRadius: 1,
+                      offset: Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                  const Text(
+                  "Policy Details",
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+
+
+                const SizedBox(height: 16),
+
+            Text(
+              "Name: ${listno.isNotEmpty ? listno.first['name'] ?? '' : ''}",
+              style: const TextStyle(fontSize: 16),
+            ),
+
+            const SizedBox(height: 8),
+
+            Text(
+              "Policy No: ${listno.isNotEmpty ? listno.first['policyno'] ?? '' : ''}",
+              style: const TextStyle(fontSize: 16),
+            ),
+
+            const SizedBox(height: 8),
+
+            Text(
+              "Description: ${describe.isNotEmpty ? describe.first['describe'] ?? '' : ''}",
+              style: const TextStyle(fontSize: 16),
+            ),
+          ],
+
+
+        ),
+      ),
+
+      const SizedBox(height: 16),
+
+      Container(
               width: double.infinity,
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -407,7 +509,14 @@ class _PreviewscreenState extends State<Previewscreen> {
               ),
             ) ,
 
-            const SizedBox(height: 10),
+            const SizedBox(height: 15),
+
+            Center(
+
+              child: ElevatedButton(onPressed: (){
+                registerBiometric() ;
+              }, child: Text("Submit")),
+            )
           ],
         ),
       ),
