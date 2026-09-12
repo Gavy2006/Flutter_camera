@@ -7,6 +7,7 @@ import 'package:video_player/video_player.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:video_screen/Manager/manager.dart';
 
+import 'NewPreviewScreen.dart';
 import 'PreviewScreen.dart';
 
 class Videoscreen extends StatefulWidget {
@@ -237,7 +238,7 @@ class _VideoscreenState extends State<Videoscreen> {
 
       MaterialPageRoute(
         builder: (context) =>
-            Previewscreen(),
+            Newpreviewscreen(),
       ),
     );
   }

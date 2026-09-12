@@ -1,9 +1,6 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'Screen/PreviewScreen.dart';
-import 'Screen/SignUpScreen.dart';
-import 'Screen/firstPage.dart';
-import 'Screen/formPage.dart';
+import 'Screen/NewPreviewScreen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,7 +28,7 @@ class MyApp extends StatelessWidget {
           seedColor: Colors.deepPurple,
         ),
       ),
-      home: FormPage(camera:  camera)
+      home: Newpreviewscreen()
     );
   }
 }
