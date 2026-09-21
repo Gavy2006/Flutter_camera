@@ -1,7 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:video_screen/Manager/firebasemanger.dart';
 import 'package:video_screen/Manager/manager.dart';
 import 'package:video_screen/Screen/firstPage.dart';
 import 'package:camera/camera.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 class FormPage extends StatefulWidget {
   final CameraDescription camera;
 
@@ -15,9 +20,12 @@ class _FormPage extends State<FormPage> {
   final TextEditingController name = TextEditingController();
   final TextEditingController policy = TextEditingController();
   final TextEditingController description = TextEditingController();
-
+  final TextEditingController location = TextEditingController();
+  final TextEditingController date = TextEditingController();
   String? damagetype;
   int steps = 1;
+
+  StreamSubscription<List<ConnectivityResult>>? connectivitySubscription;
 
   void stepinc() {
     if (steps < 3) {
@@ -35,10 +43,65 @@ class _FormPage extends State<FormPage> {
     }
   }
 
+  void startAutoSync() {
+
+    connectivitySubscription =
+        Connectivity().onConnectivityChanged.listen((result) async {
+
+          final isConnected =
+              result.contains(ConnectivityResult.wifi) ||
+                  result.contains(ConnectivityResult.mobile);
+
+          if (isConnected) {
+            print("Internet available - syncing data...");
+
+            await firebasemanager().syncToFirestore();
+          }
+        });
+  }
+  Future<void> selectDate() async {
+
+    final DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime.now(),
+    );
+
+    if (pickedDate != null) {
+      setState(() {
+        date.text =
+        "${pickedDate.day}/${pickedDate.month}/${pickedDate.year}";
+      });
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+
+      appBar: AppBar(backgroundColor: const Color(0xFFE8F6EF), leading: Icon(Icons.arrow_back), title: Text("File a Claim"),
+
+      actions: [
+        Container(
+          margin: const EdgeInsets.only(right: 1),
+      padding: const EdgeInsets.symmetric(
+        horizontal: 16,
+        vertical: 10,) ,
+          decoration: BoxDecoration(
+            color: Colors.green.shade50 ,
+            borderRadius: BorderRadius.circular(16)
+          ),
+
+          child: Row(
+            children: [
+              Icon(Icons.headset_mic, size: 20),
+              SizedBox(width: 8),
+              Text("Need Help?" , style: const TextStyle(fontSize: 10),),
+            ],
+          ),
+        )
+      ],),
       body: SafeArea(
         child: Column(
           children: [
@@ -71,7 +134,7 @@ class _FormPage extends State<FormPage> {
                           style: TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.w800,
-                            color: Color(0xff20244A),
+                            color: const Color(0xFF005B4F),
                           ),
                         ),
 
@@ -91,7 +154,7 @@ class _FormPage extends State<FormPage> {
 
                   Image.asset(
 
-                    steps == 1 ?'assets/images/img.png' : steps == 2 ? 'assets/images/img_1.png' : 'assets/images/img_2.png',
+                    steps == 1 ?'assets/images/img_3.png' : steps == 2 ? 'assets/images/img_5.png' : 'assets/images/img_4.png',
                     width: 100,
                     height: 100,
                   )
@@ -106,139 +169,192 @@ class _FormPage extends State<FormPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      "Submit Your Claim",
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xff242542),
+
+                    Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 1,
+                        vertical: 10,
                       ),
-                    ),
-
-                    const SizedBox(height: 5),
-
-                    Text(
-                      "Complete all steps to submit your insurance claim",
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Colors.grey.shade600,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE8F6EF),
+                        borderRadius: BorderRadius.circular(14),
                       ),
-                    ),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 28,
+                            height: 28,
+                            decoration: const BoxDecoration(
+                              color: Color(0xFF00866A),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.verified_user,
+                              color: Colors.white,
+                              size: 17,
+                            ),
+                          ),
+
+                          const SizedBox(width: 10),
+
+                          const Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "Safe & Secure",
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                    color: Color(0xFF152238),
+                                  ),
+                                ),
+                                SizedBox(height: 2),
+                                Text(
+                                  "Your information is encrypted and protected.",
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          const Icon(
+                            Icons.chevron_right,
+                            color: Color(0xFF00866A),
+                            size: 22,
+                          ),
+                        ],
+                      ),
+                    ) ,
 
 
-                    const SizedBox(height: 10),
-                   if(steps ==1 || steps ==3)
+
+                    const SizedBox(height: 12),
+                  // if(steps ==1 || steps ==3)
                      Row(
-                      children: [
-                        Column(
-                          children: [
-                            CircleAvatar(
-                              radius: 20,
-                              backgroundColor: steps >= 1
-                                  ? const Color(0xff6848C7)
-                                  : Colors.grey,
-                              child: const Text(
-                                "1",
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
+                       children: [
+                         Column(
+                           children: [
+                             CircleAvatar(
+                               radius: 17,
+                               backgroundColor: steps >= 1
+                                   ? const Color(0xff00866A)
+                                   : Colors.grey.shade400,
+                               child: const Text(
+                                 "1",
+                                 style: TextStyle(
+                                   fontSize: 14,
+                                   fontWeight: FontWeight.bold,
+                                   color: Colors.white,
+                                 ),
+                               ),
+                             ),
 
-                            const SizedBox(height: 6),
+                             const SizedBox(height: 5),
 
-                            Text(
-                              "Personal",
-                              style: TextStyle(
-                                color: steps >= 1
-                                    ? Color(0xff6848C7)
-                                    : Colors.grey,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
+                             Text(
+                               "Personal",
+                               style: TextStyle(
+                                 fontSize: 13,
+                                 color: steps >= 1
+                                     ? const Color(0xff00866A)
+                                     : Colors.grey,
+                                 fontWeight: FontWeight.w600,
+                               ),
+                             ),
+                           ],
+                         ),
 
-                        Expanded(
-                          child: Container(
-                            height: 2,
-                            color: steps >= 2 ? Color(0xff6848C7) : Colors.grey,
-                            margin: const EdgeInsets.only(bottom: 25),
-                          ),
-                        ),
+                         Expanded(
+                           child: Container(
+                             height: 2,
+                             color: steps >= 2
+                                 ? const Color(0xff00866A)
+                                 : Colors.grey.shade300,
+                             margin: const EdgeInsets.only(bottom: 22),
+                           ),
+                         ),
 
-                        Column(
-                          children: [
-                            CircleAvatar(
-                              radius: 20,
-                              backgroundColor: steps >= 2
-                                  ? const Color(0xff6848C7)
-                                  : Colors.grey,
-                              child: const Text(
-                                "2",
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
+                         Column(
+                           children: [
+                             CircleAvatar(
+                               radius: 17,
+                               backgroundColor: steps >= 2
+                                   ? const Color(0xff00866A)
+                                   : Colors.grey.shade400,
+                               child: const Text(
+                                 "2",
+                                 style: TextStyle(
+                                   fontSize: 14,
+                                   fontWeight: FontWeight.bold,
+                                   color: Colors.white,
+                                 ),
+                               ),
+                             ),
 
-                            const SizedBox(height: 6),
+                             const SizedBox(height: 5),
 
-                            Text(
-                              "Damage",
-                              style: TextStyle(
-                                color: steps >= 2
-                                    ? const Color(0xff6848C7)
-                                    : Colors.grey,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
+                             Text(
+                               "Damage",
+                               style: TextStyle(
+                                 fontSize: 13,
+                                 color: steps >= 2
+                                     ? const Color(0xff00866A)
+                                     : Colors.grey,
+                                 fontWeight: FontWeight.w600,
+                               ),
+                             ),
+                           ],
+                         ),
 
-                        Expanded(
-                          child: Container(
-                            height: 2,
-                            color: steps >= 3 ? const Color(0xff6848C7) : Colors
-                                .grey,
-                            margin: const EdgeInsets.only(bottom: 25),
-                          ),
-                        ),
+                         Expanded(
+                           child: Container(
+                             height: 2,
+                             color: steps >= 3
+                                 ? const Color(0xff00866A)
+                                 : Colors.grey.shade300,
+                             margin: const EdgeInsets.only(bottom: 22),
+                           ),
+                         ),
 
-                        Column(
-                          children: [
-                            CircleAvatar(
-                              radius: 20,
-                              backgroundColor: steps >= 3
-                                  ? const Color(0xff6848C7)
-                                  : Colors.grey,
-                              child: const Text(
-                                "3",
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
+                         Column(
+                           children: [
+                             CircleAvatar(
+                               radius: 17,
+                               backgroundColor: steps >= 3
+                                   ? const Color(0xff00866A)
+                                   : Colors.grey.shade400,
+                               child: const Text(
+                                 "3",
+                                 style: TextStyle(
+                                   fontSize: 14,
+                                   fontWeight: FontWeight.bold,
+                                   color: Colors.white,
+                                 ),
+                               ),
+                             ),
 
-                            const SizedBox(height: 6),
+                             const SizedBox(height: 5),
 
-                            Text(
-                              "Image",
-                              style: TextStyle(
-                                color: steps >= 3
-                                    ? const Color(0xff6848C7)
-                                    : Colors.grey,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                     const SizedBox(height: 28),
+                             Text(
+                               "Images",
+                               style: TextStyle(
+                                 fontSize: 13,
+                                 color: steps >= 3
+                                     ? const Color(0xff00866A)
+                                     : Colors.grey,
+                                 fontWeight: FontWeight.w600,
+                               ),
+                             ),
+                           ],
+                         ),
+                       ],
+                     ) ,
+                     const SizedBox(height: 20),
 
 
                     Column(
@@ -251,37 +367,69 @@ class _FormPage extends State<FormPage> {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(14),
                               side:  const BorderSide(
-                                color: Color(0xff6848C7),
+                                color: Color(0xFF00866A),
                                 width: 1.5,
                               ),
                             ),
 
                             child: SizedBox(
                               width: 350,
-                              height: 250,
+                              height: 260,
                               child: Padding(
                                 padding: const EdgeInsets.all(18),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Text(
-                                      "Personal Details",
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 18,
-                                        color: Colors.black87,
+                                    Container(
+                                      padding: const EdgeInsets.all(12),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFFE8F6EF),
+                                        borderRadius: BorderRadius.circular(14),
                                       ),
-                                    ),
+                                      child: Row(
+                                        children: [
+                                          Container(
+                                            width: 42,
+                                            height: 32,
+                                            decoration: BoxDecoration(
+                                              color: const Color(0xFFD1F0E2),
+                                              borderRadius: BorderRadius.circular(12),
+                                            ),
+                                            child: const Icon(
+                                              Icons.person_outline,
+                                              color: Color(0xFF00866A),
+                                              size: 25,
+                                            ),
+                                          ),
 
-                                    const SizedBox(height: 3),
+                                          const SizedBox(width: 12),
 
-                                    Text(
-                                      "Enter your basic policy information",
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        color: Colors.grey.shade600,
+                                          const Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                "Personal Details",
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 12,
+                                                  color: Colors.black87,
+                                                ),
+                                              ),
+
+                                              SizedBox(height: 1),
+
+                                              Text(
+                                                "Enter your basic policy information",
+                                                style: TextStyle(
+                                                  fontSize: 10,
+                                                  color: Colors.grey,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
                                       ),
-                                    ),
+                                    ) ,
 
                                     const SizedBox(height: 14),
 
@@ -422,13 +570,13 @@ class _FormPage extends State<FormPage> {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(14),
                               side: const BorderSide(
-                                color: Color(0xff6848C7),
+                                color: Color(0xFF00866A),
                                 width: 1.5,
                               ),
                             ),
                             child: SizedBox(
                               width: 350,
-                              height: 350,
+                              height: 260,
                               child: SingleChildScrollView(
                                 padding: const EdgeInsets.all(16),
                                 child: Column(
@@ -439,10 +587,10 @@ class _FormPage extends State<FormPage> {
                                     Row(
                                       children: [
                                         CircleAvatar(
-                                          backgroundColor: const Color(0xffF0EDFA),
+                                          backgroundColor: const Color(0xFFE8F6EF),
                                           child: const Icon(
                                             Icons.construction,
-                                            color: Color(0xff6848C7),
+                                            color: Color(0xFF00866A),
                                           ),
                                         ),
 
@@ -495,21 +643,21 @@ class _FormPage extends State<FormPage> {
                                           border: OutlineInputBorder(
                                             borderRadius: BorderRadius.circular(8),
                                             borderSide: const BorderSide(
-                                              color: Color(0xff6848C7),
+                                              color: Color(0xFFE8F6EF),
                                               width: 1.2,
                                             ),
                                           ),
                                           enabledBorder: OutlineInputBorder(
                                             borderRadius: BorderRadius.circular(8),
                                             borderSide: const BorderSide(
-                                              color: Color(0xff6848C7),
+                                              color: Color(0xFFE8F6EF),
                                               width: 1.2,
                                             ),
                                           ),
                                           focusedBorder: OutlineInputBorder(
                                             borderRadius: BorderRadius.circular(8),
                                             borderSide: const BorderSide(
-                                              color: Color(0xff6848C7),
+                                              color: Color(0xFFE8F6EF),
                                               width: 1.5,
                                             ),
                                           ),
@@ -577,7 +725,9 @@ class _FormPage extends State<FormPage> {
                                     SizedBox(
                                       height: 42,
                                       child: TextField(
-                                        controller: name,
+                                        controller: date,
+                                        readOnly: true,
+                                        onTap: selectDate,
                                         decoration: InputDecoration(
                                           prefixIcon: Icon(Icons.calendar_month),
                                           hintText: "Select Date",
@@ -604,7 +754,7 @@ class _FormPage extends State<FormPage> {
                                     SizedBox(
                                       height: 42,
                                       child: TextField(
-                                        controller: policy,
+                                        controller: location,
                                         decoration: InputDecoration(
                                           prefixIcon: Icon(Icons.location_city),
                                           hintText: "Enter incident location",
@@ -627,7 +777,7 @@ class _FormPage extends State<FormPage> {
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(14),
                                 side:  const BorderSide(
-                                  color: Color(0xff6848C7),
+                                  color: Color(0xFF00866A),
                                   width: 1.5,
                                 )
                             ),
@@ -645,7 +795,9 @@ class _FormPage extends State<FormPage> {
                                         children:[
 
                                           CircleAvatar(
-                                            child: Icon(Icons.photo , color: Color(0xff6848C7),),
+                                            backgroundColor: const Color(0xFFE8F6EF),
+
+                                            child: Icon(Icons.photo , color: Color(0xFF00866A),),
                                           ) ,
 
                                           const   SizedBox(width: 8,) ,
@@ -671,19 +823,19 @@ class _FormPage extends State<FormPage> {
                                                 )
                                               ]) ,])
                                     ,
-                                    const SizedBox(height: 18),
+                                    const SizedBox(height: 5),
 
 
                                     SizedBox(
                                       width: double.infinity,
-                                      height: 120,
+                                      height: 100,
                                       child: Card(
                                         color: Colors.white,
                                         elevation: 2,
                                         shape: RoundedRectangleBorder(
                                           borderRadius: BorderRadius.circular(12),
                                           side: const BorderSide(
-                                            color: Color(0xff6848C7),
+                                            color: Color(0xFF00866A),
                                             width: 1.2,
                                           ),
                                         ),
@@ -697,7 +849,7 @@ class _FormPage extends State<FormPage> {
                                             children: [
                                               const Icon(
                                                 Icons.cloud_upload_outlined,
-                                                color: Color(0xff6848C7),
+                                                color: Color(0xFF00866A),
                                                 size: 38,
                                               ),
 
@@ -716,13 +868,77 @@ class _FormPage extends State<FormPage> {
                                         ),
                                       ),
                                     ),
+
+                                    const SizedBox(height: 5),
+                                    Row(
+                                      children: [
+                                        Container(
+                                          width: 45,
+                                          height: 45,
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(10),
+                                            image: const DecorationImage(
+                                              image: AssetImage('assets/images/img_6.png'),
+                                              fit: BoxFit.cover,
+                                            ),
+                                          ),
+                                        ),
+
+                                        const SizedBox(width: 14),
+
+                                        Container(
+                                          width: 45,
+                                          height: 45,
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(10),
+                                            image: const DecorationImage(
+                                              image: AssetImage('assets/images/img_7.png'),
+                                              fit: BoxFit.cover,
+                                            ),
+                                          ),
+                                        ),
+
+                                        const SizedBox(width: 14),
+
+                                        Container(
+                                          width: 45,
+                                          height: 45,
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(10),
+                                            image: const DecorationImage(
+                                              image: AssetImage('assets/images/img_8.png'),
+                                              fit: BoxFit.cover,
+                                            ),
+                                          ),
+                                        ),
+
+                                        const SizedBox(width: 14),
+
+                                        Container(
+                                          width: 45,
+                                          height: 45,
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(10),
+                                            border: Border.all(
+                                              color: Color(0xFF00897B),
+                                              width: 1.5,
+                                            ),
+                                          ),
+                                          child: const Icon(
+                                            Icons.add,
+                                            color: Color(0xFF00897B),
+                                            size: 30,
+                                          ),
+                                        ),
+                                      ],
+                                    )
                                   ],
                                 ),
                               ),
                             ),
                           ),
 
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 15),
 
                         SizedBox(
                           width: 350,
@@ -743,7 +959,10 @@ class _FormPage extends State<FormPage> {
                                   });
                                 } else if (steps == 2) {
                                   await manager().describe(
+                                    damagetype!,
                                     description.text.trim(),
+                                      date.text,
+                                    location.text
                                   );
 
                                   if (!mounted) return;
@@ -761,7 +980,7 @@ class _FormPage extends State<FormPage> {
                               }
                             },
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xff6848C7),
+                              backgroundColor:  const Color(0xff00866A),
                               foregroundColor: Colors.white,
                             ),
                             child: Text(steps == 3 ? "Submit" : "Continue"),
@@ -769,7 +988,7 @@ class _FormPage extends State<FormPage> {
                         ),
 
 
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 10),
 
                         SizedBox(
                           width: 350,
@@ -786,11 +1005,11 @@ class _FormPage extends State<FormPage> {
                               backgroundColor:  Colors.white,
                               foregroundColor: Colors.white,
                               side: const BorderSide(
-                                color: Color(0xff6848C7),
+                              color :  const Color(0xff00866A),
                                 width: 1.5,
                               ),
                             ),
-                            child: Text("Cancel" , style: const TextStyle(color:  Color(0xff6848C7)),),
+                            child: Text("Cancel" , style: const TextStyle(color:   const Color(0xff00866A)),),
                           ),
                         ),
                       ],

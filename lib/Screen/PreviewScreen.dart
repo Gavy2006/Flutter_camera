@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:video_screen/Manager/manager.dart';
 
+import '../Manager/firebasemanger.dart';
+
 class Previewscreen extends StatefulWidget {
 
 
@@ -513,9 +515,36 @@ class _PreviewscreenState extends State<Previewscreen> {
 
             Center(
 
-              child: ElevatedButton(onPressed: (){
-                registerBiometric() ;
-              }, child: Text("Submit")),
+              child:ElevatedButton(
+                onPressed: () async {
+
+                  await registerBiometric();
+
+                  try {
+
+                    await firebasemanager().syncToFirestore();
+
+                    if (!mounted) return;
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text("Claim submitted successfully"),
+                      ),
+                    );
+
+                  } catch (e) {
+
+                    if (!mounted) return;
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text("Submission failed: $e"),
+                      ),
+                    );
+                  }
+                },
+                child: const Text("Submit"),
+              ),
             )
           ],
         ),

@@ -15,7 +15,7 @@ class manager{
 
     return await openDatabase(
       dpath,
-      version: 2,
+      version: 3,
 
       onCreate: (db, version) async {
         await db.execute('''
@@ -41,10 +41,13 @@ class manager{
     ''');
 
         await db.execute('''
-      CREATE TABLE describe(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        describe TEXT
-      )
+     CREATE TABLE describe(
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  damageType TEXT ,
+  describe TEXT  ,
+  date TEXT  ,
+  Location TEXT
+)
     ''');
       },
     );
@@ -87,42 +90,53 @@ class manager{
   }
 
 
-  Future< List<Map<String , dynamic?>> > returndetails() async{
+  Future<List<Map<String, dynamic>>> returndetails() async {
+    final db = await getDatabase();
 
-    final db = await getDatabase() ;
+    final data = await db.query(
+      'policy',
+      orderBy: 'id DESC',
+      limit: 1,
+    );
 
-    final data  = await db.query('policy') ;
-
-    return data ;
+    return data;
   }
 
 
   Future<void> describe(
-
+      String damageType ,
       String describe,
-
+      String date ,
+      String Location
       ) async{
 
     final db = await getDatabase() ;
 
     await db.insert(
         'describe' ,
-        {
-          "describe" : describe ,
 
+        {
+          "damageType" : damageType ,
+          "describe" : describe ,
+          "date" : date ,
+          "Location" : Location
         }
     ) ;
   }
 
 
-  Future< List<Map<String , dynamic?>> > returndescribe() async{
+  Future<List<Map<String, dynamic>>> returndescribe() async {
+    final db = await getDatabase();
 
-    final db = await getDatabase() ;
+    final data = await db.query(
+      'describe',
+      orderBy: 'id DESC',
+      limit: 1,
+    );
 
-    final data  = await db.query('describe') ;
-
-    return data ;
+    return data;
   }
+
 
 
 

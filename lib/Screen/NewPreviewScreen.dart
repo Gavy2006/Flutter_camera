@@ -6,7 +6,7 @@ import 'package:video_screen/Manager/manager.dart';
 import 'package:video_player/video_player.dart';
 import 'package:signature/signature.dart';
 import 'VideoScreen.dart';
-
+import 'package:video_screen/Manager/firebasemanger.dart';
 
 class Newpreviewscreen extends StatefulWidget{
   const Newpreviewscreen({super.key}) ;
@@ -18,7 +18,12 @@ class Newpreviewscreen extends StatefulWidget{
 
 class _Newpreviewscreen extends State<Newpreviewscreen>{
 
-   String? file;
+
+  List<Map<String, dynamic>> policyDetails = [];
+  List<Map<String, dynamic>> listno = [];
+  List<Map<String, dynamic>> describe = [];
+
+  String? file;
    List<String> list = [];
   late VideoPlayerController videoController;
 
@@ -59,7 +64,7 @@ class _Newpreviewscreen extends State<Newpreviewscreen>{
              decoration: BoxDecoration(
                color: Colors.white,
                border: Border.all(
-                 color: const Color(0xff6848C7),
+                 color: const Color(0xFF00866A),
                ),
                borderRadius: BorderRadius.circular(10),
              ),
@@ -85,7 +90,7 @@ class _Newpreviewscreen extends State<Newpreviewscreen>{
                  Navigator.pop(context);
                },
                style: ElevatedButton.styleFrom(
-                 backgroundColor: const Color(0xff6848C7),
+                 backgroundColor: const Color(0xFF00866A),
                  foregroundColor: Colors.white,
                ),
                child: const Text("Done"),
@@ -96,26 +101,43 @@ class _Newpreviewscreen extends State<Newpreviewscreen>{
        },
      );
    }
+
+  Future<void> listdetails() async {
+
+    final listno1 = await manager().returndetails();
+    final describe1 = await manager().returndescribe();
+
+    setState(() {
+      listno = listno1;
+      describe = describe1;
+    });
+  }
+
+
   Future<void> loadData() async {
+
+    final details = await manager().returndetails();
+    final describeData = await manager().returndescribe();
 
     final images = await manager().returnimages();
     final video = await manager().returnvideo();
 
-
     setState(() {
+      listno = details;
+      describe = describeData;
+
       list = images;
-     file = video;
+      file = video;
     });
 
     videoController = VideoPlayerController.file(
       File(file!),
-   );
+    );
 
     await videoController.initialize();
 
     setState(() {});
   }
-
   @override
   void initState() {
     super.initState();
@@ -132,12 +154,15 @@ class _Newpreviewscreen extends State<Newpreviewscreen>{
   Widget build(BuildContext context){
 
     return Scaffold(
+      backgroundColor: Colors.white,
 
-      appBar: AppBar(
+      appBar: AppBar(      backgroundColor: Colors.white,
+
         centerTitle: true,
         title: const Text("Review Your Claim" , style: const TextStyle(fontWeight: FontWeight.bold),),
       ),
       body: SingleChildScrollView(
+
         child: Padding(padding: EdgeInsets.all(16) ,
         child: Column(
           children: [
@@ -157,7 +182,7 @@ class _Newpreviewscreen extends State<Newpreviewscreen>{
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14),
                 side: const BorderSide(
-                  color: Color(0xff6848C7),
+                  color: Color(0xFF00866A),
                   width: 1.5,
                 ),
               ),
@@ -174,10 +199,10 @@ class _Newpreviewscreen extends State<Newpreviewscreen>{
                       Row(
                         children: [
                           CircleAvatar(
-                            backgroundColor: const Color(0xffF0EDFA),
+                            backgroundColor: const Color(0xFFE8F6EF),
                             child: const Icon(
                               Icons.construction,
-                              color: Color(0xff6848C7),
+                              color: Color(0xFF00866A),
                             ),
                           ),
 
@@ -211,13 +236,12 @@ class _Newpreviewscreen extends State<Newpreviewscreen>{
                       Column(
                         children: [
 
-                          // Full Name
                           Row(
                             children: [
                               const Icon(
                                 Icons.person,
                                 size: 20,
-                                color: Color(0xff6848C7),
+                                color: Color(0xFF00866A),
                               ),
                               const SizedBox(width: 12),
 
@@ -234,9 +258,10 @@ class _Newpreviewscreen extends State<Newpreviewscreen>{
                               const Text(":"),
                               const SizedBox(width: 10),
 
-                              const Expanded(
+
+                               Expanded(
                                 child: Text(
-                                  "Gavy",
+                                    "${listno.isNotEmpty ? listno.first['name'] ?? '' : ''}",
                                   style: TextStyle(
                                     fontWeight: FontWeight.w600,
                                   ),
@@ -247,13 +272,12 @@ class _Newpreviewscreen extends State<Newpreviewscreen>{
 
                           const SizedBox(height: 10),
 
-                          // Policy Number
                           Row(
                             children: [
                               const Icon(
                                 Icons.book,
                                 size: 20,
-                                color: Color(0xff6848C7),
+                                color: Color(0xFF00866A),
                               ),
                               const SizedBox(width: 12),
 
@@ -270,9 +294,9 @@ class _Newpreviewscreen extends State<Newpreviewscreen>{
                               const Text(":"),
                               const SizedBox(width: 10),
 
-                              const Expanded(
+                               Expanded(
                                 child: Text(
-                                  "ABCD12344",
+                                    "${listno.isNotEmpty ? listno.first['policyno'] ?? '' : ''}",
                                   style: TextStyle(
                                     fontWeight: FontWeight.w600,
                                   ),
@@ -283,13 +307,12 @@ class _Newpreviewscreen extends State<Newpreviewscreen>{
 
                           const SizedBox(height: 10),
 
-                          // Damage Type
                           Row(
                             children: [
                               const Icon(
                                 Icons.description,
                                 size: 20,
-                                color: Color(0xff6848C7),
+                                color: Color(0xFF00866A),
                               ),
                               const SizedBox(width: 12),
 
@@ -306,9 +329,9 @@ class _Newpreviewscreen extends State<Newpreviewscreen>{
                               const Text(":"),
                               const SizedBox(width: 10),
 
-                              const Expanded(
+                               Expanded(
                                 child: Text(
-                                  "Minor Damage",
+                                    "Damage Type: ${describe.isNotEmpty ? describe.first['damageType'] ?? '' : ''}",
                                   style: TextStyle(
                                     fontWeight: FontWeight.w600,
                                   ),
@@ -319,14 +342,13 @@ class _Newpreviewscreen extends State<Newpreviewscreen>{
 
                           const SizedBox(height: 10),
 
-                          // Description
                           Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const Icon(
                                 Icons.description,
                                 size: 20,
-                                color: Color(0xff6848C7),
+                                color: Color(0xFF00866A),
                               ),
                               const SizedBox(width: 12),
 
@@ -343,9 +365,9 @@ class _Newpreviewscreen extends State<Newpreviewscreen>{
                               const Text(":"),
                               const SizedBox(width: 10),
 
-                              const Expanded(
+                               Expanded(
                                 child: Text(
-                                  "Front bumper is scratched",
+                                "${describe.isNotEmpty ? describe.first['describe'] ?? '' : ''}",
                                   style: TextStyle(
                                     fontWeight: FontWeight.w600,
                                   ),
@@ -356,13 +378,12 @@ class _Newpreviewscreen extends State<Newpreviewscreen>{
 
                           const SizedBox(height: 10),
 
-                          // Incident Date
                           Row(
                             children: [
                               const Icon(
                                 Icons.calendar_month,
                                 size: 20,
-                                color: Color(0xff6848C7),
+                                color: Color(0xFF00866A),
                               ),
                               const SizedBox(width: 12),
 
@@ -379,9 +400,9 @@ class _Newpreviewscreen extends State<Newpreviewscreen>{
                               const Text(":"),
                               const SizedBox(width: 10),
 
-                              const Expanded(
+                               Expanded(
                                 child: Text(
-                                  "12 Sep 2026",
+    "${describe.isNotEmpty ? describe.first['date'] ?? '' : ''}",
                                   style: TextStyle(
                                     fontWeight: FontWeight.w600,
                                   ),
@@ -392,14 +413,14 @@ class _Newpreviewscreen extends State<Newpreviewscreen>{
 
                           const SizedBox(height: 10),
 
-                          // Location
+
                           Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const Icon(
                                 Icons.location_pin,
                                 size: 20,
-                                color: Color(0xff6848C7),
+                                color: Color(0xFF00866A),
                               ),
                               const SizedBox(width: 12),
 
@@ -416,10 +437,9 @@ class _Newpreviewscreen extends State<Newpreviewscreen>{
                               const Text(":"),
                               const SizedBox(width: 10),
 
-                              const Expanded(
-                                child: Text(
-                                  "Kurukshetra, Haryana",
-                                  style: TextStyle(
+                               Expanded(
+                                child: Text(  "${describe.isNotEmpty ? describe.first['Location'] ?? '' : ''}"
+                                  ,style: TextStyle(
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
@@ -445,7 +465,7 @@ class _Newpreviewscreen extends State<Newpreviewscreen>{
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14),
                 side: const BorderSide(
-                  color: Color(0xff6848C7),
+                  color: Color(0xFF00866A),
                   width: 1.5,
                 ),
               ),
@@ -461,7 +481,7 @@ class _Newpreviewscreen extends State<Newpreviewscreen>{
                           backgroundColor: const Color(0xffF0EDFA),
                           child: const Icon(
                             Icons.photo,
-                            color: Color(0xff6848C7),
+                            color: Color(0xFF00866A),
                           ),
                         ),
 
@@ -543,7 +563,7 @@ class _Newpreviewscreen extends State<Newpreviewscreen>{
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14),
                 side: const BorderSide(
-                  color: Color(0xff6848C7),
+                  color: Color(0xFF00866A),
                   width: 1.5,
                 ),
               ),
@@ -560,10 +580,10 @@ class _Newpreviewscreen extends State<Newpreviewscreen>{
                       Row(
                         children: [
                           CircleAvatar(
-                            backgroundColor: const Color(0xffF0EDFA),
+                            backgroundColor: const Color(0xFFE8F6EF),
                             child: const Icon(
                               Icons.construction,
-                              color: Color(0xff6848C7),
+                              color: Color(0xFF00866A),
                             ),
                           ),
 
@@ -604,7 +624,7 @@ class _Newpreviewscreen extends State<Newpreviewscreen>{
                            height: 70,
                            decoration: BoxDecoration(
                              border: Border.all(
-                               color: const Color(0xff6848C7),
+                               color: const Color(0xFF00866A),
                                width: 1.5,
                              ),
                              borderRadius: BorderRadius.circular(10),
@@ -612,7 +632,7 @@ class _Newpreviewscreen extends State<Newpreviewscreen>{
                            child: const Center(
                              child: Icon(
                                Icons.video_file,
-                               color: Color(0xff6848C7),
+                               color: Color(0xFF00866A),
                                size: 30,
                              ),
                            ),
@@ -718,7 +738,7 @@ class _Newpreviewscreen extends State<Newpreviewscreen>{
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14),
                 side: const BorderSide(
-                  color: Color(0xff6848C7),
+                  color: Color(0xFF00866A),
                   width: 1.5,
                 ),
               ),
@@ -735,10 +755,10 @@ class _Newpreviewscreen extends State<Newpreviewscreen>{
                       Row(
                         children: [
                           CircleAvatar(
-                            backgroundColor: const Color(0xffF0EDFA),
+                            backgroundColor: const Color(0xFFE8F6EF),
                             child: const Icon(
                               Icons.construction,
-                              color: Color(0xff6848C7),
+                              color: Color(0xFF00866A),
                             ),
                           ),
 
@@ -776,7 +796,7 @@ class _Newpreviewscreen extends State<Newpreviewscreen>{
                             "Add Signature",
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              color: Color(0xff6848C7),
+                              color: Color(0xFF00866A),
                             ),
                           ),
                         )
@@ -811,9 +831,35 @@ class _Newpreviewscreen extends State<Newpreviewscreen>{
               width: 350,
               height: 48,
               child: ElevatedButton(
-                onPressed: () {},
+                onPressed: () async {
+
+                  try {
+
+                    await firebasemanager().syncToFirestore();
+
+                    if (!mounted) return;
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text("Claim submitted successfully"),
+                      ),
+                    );
+
+                  } catch (e) {
+
+                    print("Firestore Error: $e");
+
+                    if (!mounted) return;
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text("Submission failed: $e"),
+                      ),
+                    );
+                  }
+                },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xff6848C7),
+                  backgroundColor: const Color(0xFF00866A),
                   foregroundColor: Colors.white,
                 ),
                 child: Text( "Continue"),
@@ -827,16 +873,19 @@ class _Newpreviewscreen extends State<Newpreviewscreen>{
               width: 350,
               height: 48,
               child: ElevatedButton(
-                onPressed: () {} ,
+                onPressed: () {
+
+
+                } ,
                 style: ElevatedButton.styleFrom(
                   backgroundColor:  Colors.white,
                   foregroundColor: Colors.white,
                   side: const BorderSide(
-                    color: Color(0xff6848C7),
+                    color: Color(0xFF00866A),
                     width: 1.5,
                   ),
                 ),
-                child: Text("Cancel" , style: const TextStyle(color:  Color(0xff6848C7)),),
+                child: Text("Cancel" , style: const TextStyle(color:  Color(0xFF00866A)),),
               ),
             ),
           ],
